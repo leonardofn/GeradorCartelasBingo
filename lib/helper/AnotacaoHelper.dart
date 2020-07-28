@@ -17,7 +17,8 @@ class AnotacaoHelper {
     if(_db != null){
       return _db;
     }else{
-
+      _db = inicializarDB();
+      return _db;
     }
   }
 

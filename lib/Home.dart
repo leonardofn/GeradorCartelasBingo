@@ -18,12 +18,24 @@ class _HomeState extends State<Home> {
   var _db = AnotacaoHelper();
   List<Anotacao> _anotacoes = List<Anotacao>();
 
-  _exibirTelaCadastro(){
+  _exibirTelaCadastro({Anotacao anotacao}){
+
+    String textoSalvarAtualizar = "";
+    if(anotacao == null){
+      _tituloController.text = "";
+      _descricaoController.text = "";
+      textoSalvarAtualizar = "Salvar";
+    }else{
+      _tituloController.text = anotacao.titulo;
+      _descricaoController.text = anotacao.descricao;
+      textoSalvarAtualizar = "Atualizar";
+    }
+
     showDialog(
       context: context,
       builder: (context){
         return AlertDialog(
-          title: Text("Adicionar anotação"),
+          title: Text("$textoSalvarAtualizar anotação"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -51,10 +63,10 @@ class _HomeState extends State<Home> {
             ),
             FlatButton(
               onPressed: () {
-                _salvarAnotacao();
+                _salvarAtualizarAnotacao(anotacaoSelecionada: anotacao);
                 Navigator.pop(context);
               },
-              child: Text("Salvar"),
+              child: Text(textoSalvarAtualizar),
             )
           ],
         );
@@ -62,14 +74,21 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _salvarAnotacao() async {
+  _salvarAtualizarAnotacao({Anotacao anotacaoSelecionada}) async {
 
     String titulo = _tituloController.text;
     String descricao = _descricaoController.text;
     String data = DateTime.now().toString();
 
-    Anotacao anotacao = Anotacao(titulo, descricao, data);
-    int resultado = await _db.salvarAnotacao(anotacao);
+    if(anotacaoSelecionada == null){
+      Anotacao anotacao = Anotacao(titulo, descricao, data);
+      int resultado = await _db.salvarAnotacao(anotacao);
+    }else{
+      anotacaoSelecionada.titulo = titulo;
+      anotacaoSelecionada.descricao = descricao;
+      anotacaoSelecionada.data = data;
+      int resultado = await _db.atualizarAnotacao(anotacaoSelecionada);
+    }
 
     _tituloController.clear();
     _descricaoController.clear();
@@ -135,6 +154,36 @@ class _HomeState extends State<Home> {
                   child: ListTile(
                     title: Text(anotacao.titulo),
                     subtitle: Text("${_formatarData(anotacao.data)} - ${anotacao.descricao}"),
+                    trailing: Row(
+                      // Ocupa o mínimo de espaço disponível
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: (){
+                            _exibirTelaCadastro(anotacao: anotacao);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 16),
+                            child: Icon(
+                              Icons.edit,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 0),
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }

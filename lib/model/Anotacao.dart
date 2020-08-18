@@ -7,7 +7,7 @@ class Anotacao {
 
   Anotacao(this.titulo, this.descricao, this.data);
 
-  Anotacao.fromMpap(Map map){
+  Anotacao.fromMap(Map map){
 
     this.id = map["id"];
     this.titulo = map["titulo"];
